@@ -1,0 +1,222 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.modal-container {
+  background: var(--dark-gray);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 20px 32px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0,0,0,0.02);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.invoice-paper-wrapper {
+  flex: 1;
+  overflow: auto;
+  padding: 32px;
+  background: var(--near-black);
+}
+
+.invoice-paper {
+  background: white;
+  color: #111;
+  padding: 60px 50px;
+  margin: 0 auto;
+  max-width: 794px; /* A4 width */
+  min-height: 1123px; /* A4 height */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  font-family: 'Inter', sans-serif;
+}
+
+/* Printable PDF styles */
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 2px solid #222;
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+}
+
+.invoice-brand h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #000;
+  margin-bottom: 8px;
+}
+
+.invoice-brand p {
+  color: #444;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.invoice-title-block {
+  text-align: right;
+}
+
+.invoice-title-block h2 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #e5e5e5;
+  margin-bottom: 16px;
+}
+
+.invoice-meta-grid {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 8px 16px;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.invoice-meta-grid span { color: #666; }
+.invoice-meta-grid strong { color: #000; font-family: monospace; font-size: 1rem; }
+
+.invoice-customer {
+  margin-bottom: 32px;
+  padding: 16px;
+  background: #f8f8f8;
+  border-left: 4px solid #222;
+}
+
+.invoice-customer h3 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.invoice-customer p { font-size: 1.1rem; }
+
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 32px;
+}
+
+.invoice-table th {
+  background: #222;
+  color: white;
+  padding: 12px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: left;
+}
+
+.invoice-table th.text-right,
+.invoice-table td.text-right {
+  text-align: right;
+}
+
+.invoice-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+.invoice-summary {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 48px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  width: 300px;
+  padding: 12px 16px;
+}
+
+.total-row {
+  background: #f4f4f4;
+  border-top: 2px solid #222;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.invoice-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 60px;
+  padding-top: 24px;
+  border-top: 1px solid #eee;
+}
+
+.terms h4 {
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.terms p {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.signature {
+  text-align: center;
+  width: 200px;
+}
+
+.sig-line {
+  border-top: 1px solid #222;
+  margin-bottom: 8px;
+}
+
+.signature p {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+@media print {
+  @page { margin: 0; }
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .invoice-paper {
+    box-shadow: none;
+    margin: 0;
+    padding: 20mm;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .modal-overlay { padding: 16px; }
+  .modal-container { max-height: 95vh; }
+  .invoice-paper { padding: 30px 20px; }
+  .modal-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .modal-actions { width: 100%; flex-wrap: wrap; }
+  .modal-actions button { flex: 1; }
+}
