@@ -36,7 +36,14 @@ export default function InvoicePreview({ bill, onClose }) {
 
   const bDetails = bill.businessDetails || {};
   const isGSTEnabled = bDetails.enableGST;
-  const isInterState = isGSTEnabled && (bill.taxType === 'IGST' || (bDetails.businessState?.trim().toLowerCase() !== bill.customerState?.trim().toLowerCase() && bill.customerState));
+
+  // Improved calculation to handle "33-Tamil Nadu" vs "Tamil Nadu"
+  const getCleanState = (s) => (s || '').split('-').pop().trim().toLowerCase();
+  
+  const isInterState = isGSTEnabled && (
+    bill.taxType === 'IGST' || 
+    (bill.taxType !== 'CGST/SGST' && getCleanState(bDetails.businessState) !== getCleanState(bill.customerState) && bill.customerState)
+  );
 
   // Compute item totals
   const itemsRender = bill.items.map(item => {
