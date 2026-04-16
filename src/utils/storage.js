@@ -27,9 +27,9 @@ export const saveToCatalog = (item) => {
   const existingIndex = catalog.findIndex(i => i.name.toLowerCase() === item.name.toLowerCase());
   
   if (existingIndex >= 0) {
-    catalog[existingIndex] = { ...catalog[existingIndex], price: item.price, gst: item.gst };
+    catalog[existingIndex] = { ...catalog[existingIndex], price: item.price, gst: item.gst, hsn: item.hsn };
   } else {
-    catalog.push({ name: item.name, price: item.price, gst: item.gst });
+    catalog.push({ name: item.name, price: item.price, gst: item.gst, hsn: item.hsn });
   }
   
   localStorage.setItem(CATALOG_KEY, JSON.stringify(catalog));
@@ -65,10 +65,17 @@ export const deleteBill = (invoiceNo) => {
 export const getSettings = () => {
   try {
     return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {
-      businessName: 'Sri Murugan Gravel & Sand',
-      businessAddress: 'Main Road, Your City - 600001',
-      businessPhone: '+91 99999 00000',
-      businessGST: '',
+      businessName: 'SRM AGENCIES',
+      businessAddress: '27/2 mahaveer nagar ext Ullur Kumbakonam',
+      businessPhone: '9488188707',
+      businessEmail: 'srmharinitravels@gmail.com',
+      businessGST: '33BKQPN1414G1ZB',
+      businessState: '33-Tamil Nadu',
+      enableGST: true,
+      bankName: 'INDIAN BANK, MUTT STREET',
+      bankAccount: '7513201456',
+      bankIFSC: 'IDIB000M138',
+      bankHolder: 'SRM AGENCIES'
     };
   } catch { return {}; }
 };
@@ -80,10 +87,11 @@ export const saveSettings = (settings) =>
 export const generateInvoiceNo = () => {
   const bills = getBills();
   const today = new Date();
-  const year = today.getFullYear().toString().slice(-2);
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const seq = (bills.length + 1).toString().padStart(4, '0');
-  return `GS${year}${month}${seq}`;
+  const year = today.getFullYear();
+  const nextYear = String(year + 1).slice(-2);
+  const finYear = today.getMonth() >= 3 ? `${year}-${nextYear}` : `${year - 1}-${String(year).slice(-2)}`;
+  const seq = (bills.length + 1);
+  return `${finYear}/${seq}`;
 };
 
 // ── Format ────────────────────────────────────────────────────────────────────
@@ -94,5 +102,20 @@ export const formatCurrency = (amount) =>
 
 export const formatDate = (dateStr) =>
   new Date(dateStr).toLocaleDateString('en-IN', {
-    day: '2-digit', month: 'short', year: 'numeric',
+    day: '2-digit', month: '2-digit', year: 'numeric',
   });
+
+export const numberToWords = (num) => {
+  const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+  const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+  if ((num = num.toString()).length > 9) return 'overflow';
+  let n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+  if (!n) return; let str = '';
+  str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+  str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+  str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+  str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+  str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) + 'Only' : 'Only';
+  return str.trim();
+};

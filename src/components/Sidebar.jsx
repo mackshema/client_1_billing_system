@@ -6,7 +6,15 @@ export default function Sidebar({ bills, onSelectBill, selectedBillNo, onLogout 
     <aside className="sidebar">
       <div className="sidebar-header">
         <div className="brand">
-          <div className="brand-logo"></div>
+          <div className="brand-logo">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="40" height="40">
+              <rect width="200" height="200" rx="40" fill="#ffffff" />
+              <g transform="translate(10, 80)">
+                <text x="5" y="0" fontFamily="Arial, Helvetica, sans-serif" fontWeight="900" fontSize="70" fill="#0056b3" letterSpacing="-2">SRM</text>
+                <text x="10" y="30" fontFamily="Arial, Helvetica, sans-serif" fontWeight="800" fontSize="20" fill="#0056b3" letterSpacing="3">AGENCIES</text>
+              </g>
+            </svg>
+          </div>
           <div>
             <h2>Admin</h2>
             <p>Billing Panel</p>
