@@ -16,13 +16,7 @@ export default function Login({ onLogin, error, loading }) {
       <div className="login-card animate-slide-up">
         <div className="login-header">
           <div className="login-logo-container">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="80" height="80">
-              <rect width="200" height="200" rx="40" fill="#ffffff" />
-              <g transform="translate(10, 80)">
-                <text x="5" y="0" fontFamily="Arial, Helvetica, sans-serif" fontWeight="900" fontSize="70" fill="#0056b3" letterSpacing="-2">SRM</text>
-                <text x="10" y="30" fontFamily="Arial, Helvetica, sans-serif" fontWeight="800" fontSize="20" fill="#0056b3" letterSpacing="3">AGENCIES</text>
-              </g>
-            </svg>
+            <img src="/logo.jpg" alt="Tamizhan Groups Logo" width="80" height="80" style={{ borderRadius: '50%', objectFit: 'cover' }} />
           </div>
           <h1>Welcome Back</h1>
           <p>Sign in to your account to continue</p>

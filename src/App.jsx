@@ -1,22 +1,20 @@
-import { useState, useEffect } from 'react';
-import Login from './components/Login';
+import { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import InvoicePreview from './components/InvoicePreview';
 import { Toast, useToast } from './components/Toast';
-import { useAuth } from './hooks/useAuth';
 import { useBills } from './hooks/useBills';
 import { getSettings, saveSettings } from './utils/storage';
 import './App.css';
 
 function App() {
-  const { user, login, logout, loading, error, isAuthenticated } = useAuth();
   const { bills, addBill } = useBills();
   const { toasts, remove, toast } = useToast();
   
   const [businessSettings, setBusinessSettings] = useState(() => getSettings());
   const [selectedBill, setSelectedBill] = useState(null);
   const [previewBill, setPreviewBill] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const handleSaveSettings = (newSettings) => {
     saveSettings(newSettings);
@@ -29,22 +27,14 @@ function App() {
     toast.success('Bill generated successfully!');
   };
 
-  if (!isAuthenticated) {
-    return (
-      <>
-        <Login onLogin={login} error={error} loading={loading} />
-        <Toast toasts={toasts} remove={remove} />
-      </>
-    );
-  }
-
   return (
     <div className="app-container">
       <Sidebar 
         bills={bills} 
-        onSelectBill={setPreviewBill} 
+        onSelectBill={(bill) => { setPreviewBill(bill); setIsDrawerOpen(false); }} 
         selectedBillNo={previewBill?.invoiceNo}
-        onLogout={logout} 
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
       />
       
       <main className="main-content">
@@ -53,6 +43,7 @@ function App() {
           onSaveSettings={handleSaveSettings}
           onGenerateBill={handleGenerateBill}
           toast={toast}
+          onToggleDrawer={() => setIsDrawerOpen(!isDrawerOpen)}
         />
       </main>
 

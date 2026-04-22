@@ -13,6 +13,14 @@
   padding: 24px 32px;
 }
 
+.drawer-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
 .header-top {
   display: flex;
   justify-content: space-between;
@@ -24,7 +32,14 @@
 .business-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
+}
+
+.business-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .business-info h2 {
@@ -267,17 +282,44 @@
 }
 
 @media (max-width: 900px) {
-  .dashboard { padding: 20px; }
+  .dashboard { padding: 16px; }
   .items-row {
-    grid-template-columns: 1fr;
-    gap: 8px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
     background: rgba(0,0,0,0.02);
     padding: 16px;
     border-radius: var(--radius-md);
     border: 1px solid var(--border);
   }
   .items-row.headers { display: none; }
-  .col-action { margin-top: 8px; }
+  .col-name { grid-column: span 2; }
+  .col-hsn { grid-column: span 2; }
+  .col-qty { grid-column: span 1; }
+  .col-unit { grid-column: span 1; }
+  .col-price { grid-column: span 1; }
+  .col-gst { grid-column: span 1; }
+  .col-total { grid-column: span 1; display: flex; align-items: center; font-size: 1.2rem; }
+  .col-action { grid-column: span 1; display: flex; justify-content: flex-end; }
+  .col-action .btn { width: 100%; max-width: 100px; }
+
   .customer-grid { grid-template-columns: 1fr; }
   .invoice-meta { width: 100%; justify-content: space-between; }
+  
+  .summary-section {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+  .payment-input {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .payment-input input { width: 100% !important; }
+  .grand-total {
+    justify-content: space-between;
+    gap: 16px;
+  }
 }

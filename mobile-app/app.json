@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Billing System",
+    "slug": "billing-system",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/logo.jpg",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/logo.jpg",
+      "resizeMode": "contain",
+      "backgroundColor": "#1976d2"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.tamizhangroups.billing"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logo.jpg",
+        "backgroundColor": "#1976d2"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.tamizhangroups.billing",
+      "versionCode": 1
+    },
+    "web": {
+      "favicon": "./assets/logo.jpg"
+    }
+  }
+}

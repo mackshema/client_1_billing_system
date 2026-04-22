@@ -36,11 +36,12 @@ export default function InvoicePreview({ bill, onClose }) {
 
   const bDetails = bill.businessDetails || {};
   const isGSTEnabled = bDetails.enableGST;
+  const isNoGST = bill.taxType === 'No GST';
 
   // Improved calculation to handle "33-Tamil Nadu" vs "Tamil Nadu"
   const getCleanState = (s) => (s || '').split('-').pop().trim().toLowerCase();
   
-  const isInterState = isGSTEnabled && (
+  const isInterState = isGSTEnabled && !isNoGST && (
     bill.taxType === 'IGST' || 
     (bill.taxType !== 'CGST/SGST' && getCleanState(bDetails.businessState) !== getCleanState(bill.customerState) && bill.customerState)
   );
@@ -48,7 +49,7 @@ export default function InvoicePreview({ bill, onClose }) {
   // Compute item totals
   const itemsRender = bill.items.map(item => {
     const taxable = item.quantity * item.price;
-    const gstAmt = (taxable * (Number(item.gst) || 0)) / 100;
+    const gstAmt = isNoGST ? 0 : (taxable * (Number(item.gst) || 0)) / 100;
     const total = taxable + gstAmt;
     return { ...item, taxable, gstAmt, total };
   });
@@ -111,11 +112,10 @@ export default function InvoicePreview({ bill, onClose }) {
               <div className="invoice-header-row">
                 <div className="invoice-company-info">
                   <div className="srm-logo">
-                    <span className="srm-text-bold">SRM</span>
-                    <span className="srm-text-sub">AGENCIES</span>
+                    <img src="/logo.jpg" alt="Logo" width="45" height="45" style={{ borderRadius: '50%', objectFit: 'cover' }} />
                   </div>
                   <div className="company-details">
-                    <h1>{bDetails.businessName || 'SRM AGENCIES'}</h1>
+                    <h1>{bDetails.businessName || 'Tamizhan Groups'}</h1>
                     <p>{bDetails.businessAddress}</p>
                     <div className="company-contact">
                       <span>Phone: <strong>{bDetails.businessPhone}</strong></span>
@@ -154,11 +154,11 @@ export default function InvoicePreview({ bill, onClose }) {
                   <tr>
                     <th style={{width: '40px'}}>#</th>
                     <th style={{textAlign: 'left'}}>Item name</th>
-                    <th style={{width: '100px'}}>HSN/ SAC</th>
+                    {isGSTEnabled && !isNoGST && <th style={{width: '100px'}}>HSN/ SAC</th>}
                     <th style={{width: '90px', textAlign:'right'}}>Quantity</th>
                     <th style={{width: '80px', textAlign:'center'}}>Unit</th>
                     <th style={{width: '130px', textAlign:'right'}}>Price/ Unit(₹)</th>
-                    <th style={{width: '150px', textAlign:'right'}}>GST(₹)</th>
+                    {!isNoGST && <th style={{width: '150px', textAlign:'right'}}>GST(₹)</th>}
                     <th style={{width: '150px', textAlign:'right'}}>Amount(₹)</th>
                   </tr>
                 </thead>
@@ -167,11 +167,11 @@ export default function InvoicePreview({ bill, onClose }) {
                     <tr key={i}>
                       <td style={{textAlign: 'center'}}>{i + 1}</td>
                       <td style={{textAlign: 'left'}}><strong>{item.name}</strong></td>
-                      <td style={{textAlign: 'center'}}>{item.hsn || '-'}</td>
+                      {isGSTEnabled && !isNoGST && <td style={{textAlign: 'center'}}>{item.hsn || '-'}</td>}
                       <td style={{textAlign: 'right'}}>{item.quantity}</td>
                       <td style={{textAlign: 'center'}}>{item.unit || '-'}</td>
                       <td style={{textAlign: 'right'}}>{formatCurrency(item.price).replace('₹', '')}</td>
-                      <td style={{textAlign: 'right'}}>{formatCurrency(item.gstAmt).replace('₹', '')} <span style={{fontSize:'0.75rem'}}>({item.gst}%)</span></td>
+                      {!isNoGST && <td style={{textAlign: 'right'}}>{formatCurrency(item.gstAmt).replace('₹', '')} <span style={{fontSize:'0.75rem'}}>({item.gst}%)</span></td>}
                       <td style={{textAlign: 'right'}}><strong>{formatCurrency(item.taxable).replace('₹', '₹ ')}</strong></td>
                     </tr>
                   ))}
@@ -179,11 +179,10 @@ export default function InvoicePreview({ bill, onClose }) {
                   <tr className="items-total-row">
                     <td></td>
                     <td style={{textAlign: 'left'}}><strong>Total</strong></td>
-                    <td></td>
+                    {isGSTEnabled && !isNoGST && <td></td>}
                     <td style={{textAlign: 'right'}}><strong>{totalQuantity}</strong></td>
                     <td></td>
-                    <td></td>
-                    <td style={{textAlign: 'right'}}><strong>{formatCurrency(totalGST).replace('₹', '₹ ')}</strong></td>
+                    {!isNoGST && <td style={{textAlign: 'right'}}><strong>{formatCurrency(totalGST).replace('₹', '₹ ')}</strong></td>}
                     <td style={{textAlign: 'right'}}><strong>{formatCurrency(subTotal).replace('₹', '₹ ')}</strong></td>
                   </tr>
                 </tbody>
@@ -211,92 +210,94 @@ export default function InvoicePreview({ bill, onClose }) {
 
               {/* Tax Breakup & Bank */}
               <div className="bottom-split-row">
-                <div className="tax-breakup-wrapper">
-                  <table className="tax-table">
-                    <thead>
-                      <tr>
-                        <th rowSpan="2">HSN/ SAC</th>
-                        <th rowSpan="2">Taxable amount<br/>(₹)</th>
-                        {isInterState ? (
-                          <th colSpan="2">IGST</th>
-                        ) : (
-                          <>
-                            <th colSpan="2">CGST</th>
-                            <th colSpan="2">SGST</th>
-                          </>
-                        )}
-                        <th rowSpan="2">Total Tax (₹)</th>
-                      </tr>
-                      <tr>
-                        {isInterState ? (
-                          <>
-                            <th style={{borderLeft: '1px solid #000'}}>Rate (%)</th>
-                            <th>Amt (₹)</th>
-                          </>
-                        ) : (
-                          <>
-                            <th style={{borderLeft: '1px solid #000'}}>Rate (%)</th>
-                            <th>Amt (₹)</th>
-                            <th>Rate (%)</th>
-                            <th>Amt (₹)</th>
-                          </>
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {taxRows.length > 0 ? taxRows.map((r, i) => (
-                        <tr key={i}>
-                          <td style={{textAlign: 'center'}}>{r.hsn}</td>
-                          <td style={{textAlign: 'right'}}>{r.taxable.toFixed(2)}</td>
-                          {isInterState ? (
-                            <>
-                              <td style={{textAlign: 'center'}}>{r.igstRate}</td>
-                              <td style={{textAlign: 'right'}}>{r.igstAmt.toFixed(2)}</td>
-                            </>
-                          ) : (
-                            <>
-                              <td style={{textAlign: 'center'}}>{r.cgstRate}</td>
-                              <td style={{textAlign: 'right'}}>{r.cgstAmt.toFixed(2)}</td>
-                              <td style={{textAlign: 'center'}}>{r.sgstRate}</td>
-                              <td style={{textAlign: 'right'}}>{r.sgstAmt.toFixed(2)}</td>
-                            </>
-                          )}
-                          <td style={{textAlign: 'right'}}>{r.totalTax.toFixed(2)}</td>
-                        </tr>
-                      )) : (
+                {!isNoGST && (
+                  <div className="tax-breakup-wrapper">
+                    <table className="tax-table">
+                      <thead>
                         <tr>
-                          <td colSpan={isInterState ? 5 : 7} style={{textAlign: 'center'}}>No GST Applied</td>
+                          <th rowSpan="2">HSN/ SAC</th>
+                          <th rowSpan="2">Taxable amount<br/>(₹)</th>
+                          {isInterState ? (
+                            <th colSpan="2">IGST</th>
+                          ) : (
+                            <>
+                              <th colSpan="2">CGST</th>
+                              <th colSpan="2">SGST</th>
+                            </>
+                          )}
+                          <th rowSpan="2">Total Tax (₹)</th>
                         </tr>
-                      )}
-                      {taxRows.length > 0 && (
-                        <tr style={{fontWeight: 'bold'}}>
-                          <td style={{textAlign: 'right'}}>TOTAL</td>
-                          <td style={{textAlign: 'right'}}>{totalTaxableTax.toFixed(2)}</td>
+                        <tr>
                           {isInterState ? (
                             <>
-                              <td></td>
-                              <td style={{textAlign: 'right'}}>{totalIgstTax.toFixed(2)}</td>
+                              <th style={{borderLeft: '1px solid #000'}}>Rate (%)</th>
+                              <th>Amt (₹)</th>
                             </>
                           ) : (
                             <>
-                              <td></td>
-                              <td style={{textAlign: 'right'}}>{totalCgstTax.toFixed(2)}</td>
-                              <td></td>
-                              <td style={{textAlign: 'right'}}>{totalSgstTax.toFixed(2)}</td>
+                              <th style={{borderLeft: '1px solid #000'}}>Rate (%)</th>
+                              <th>Amt (₹)</th>
+                              <th>Rate (%)</th>
+                              <th>Amt (₹)</th>
                             </>
                           )}
-                          <td style={{textAlign: 'right'}}>{totalTaxAll.toFixed(2)}</td>
                         </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {taxRows.length > 0 ? taxRows.map((r, i) => (
+                          <tr key={i}>
+                            <td style={{textAlign: 'center'}}>{r.hsn}</td>
+                            <td style={{textAlign: 'right'}}>{r.taxable.toFixed(2)}</td>
+                            {isInterState ? (
+                              <>
+                                <td style={{textAlign: 'center'}}>{r.igstRate}</td>
+                                <td style={{textAlign: 'right'}}>{r.igstAmt.toFixed(2)}</td>
+                              </>
+                            ) : (
+                              <>
+                                <td style={{textAlign: 'center'}}>{r.cgstRate}</td>
+                                <td style={{textAlign: 'right'}}>{r.cgstAmt.toFixed(2)}</td>
+                                <td style={{textAlign: 'center'}}>{r.sgstRate}</td>
+                                <td style={{textAlign: 'right'}}>{r.sgstAmt.toFixed(2)}</td>
+                              </>
+                            )}
+                            <td style={{textAlign: 'right'}}>{r.totalTax.toFixed(2)}</td>
+                          </tr>
+                        )) : (
+                          <tr>
+                            <td colSpan={isInterState ? 5 : 7} style={{textAlign: 'center'}}>No GST Applied</td>
+                          </tr>
+                        )}
+                        {taxRows.length > 0 && (
+                          <tr style={{fontWeight: 'bold'}}>
+                            <td style={{textAlign: 'right'}}>TOTAL</td>
+                            <td style={{textAlign: 'right'}}>{totalTaxableTax.toFixed(2)}</td>
+                            {isInterState ? (
+                              <>
+                                <td></td>
+                                <td style={{textAlign: 'right'}}>{totalIgstTax.toFixed(2)}</td>
+                              </>
+                            ) : (
+                              <>
+                                <td></td>
+                                <td style={{textAlign: 'right'}}>{totalCgstTax.toFixed(2)}</td>
+                                <td></td>
+                                <td style={{textAlign: 'right'}}>{totalSgstTax.toFixed(2)}</td>
+                              </>
+                            )}
+                            <td style={{textAlign: 'right'}}>{totalTaxAll.toFixed(2)}</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
 
                 <div className="bank-details-wrapper">
                   <div className="bank-line"><span>Bank Name :</span> <strong>{bDetails.bankName || 'INDIAN BANK, MUTT STREET'}</strong></div>
                   <div className="bank-line"><span>Bank Account No. :</span> <strong>{bDetails.bankAccount || '7513201456'}</strong></div>
                   <div className="bank-line"><span>Bank IFSC code :</span> <strong>{bDetails.bankIFSC || 'IDIB000M138'}</strong></div>
-                  <div className="bank-line"><span>Account holder's name :</span> <strong>{bDetails.bankHolder || 'SRM AGENCIES'}</strong></div>
+                  <div className="bank-line"><span>Account holder's name :</span> <strong>{bDetails.bankHolder || 'Tamizhan Groups'}</strong></div>
                 </div>
               </div>
 
@@ -307,7 +308,7 @@ export default function InvoicePreview({ bill, onClose }) {
                   <p>Thanks for doing business with us!</p>
                 </div>
                 <div className="signature-block">
-                  <div className="auth-for">For <strong>{bDetails.businessName || 'SRM AGENCIES'}</strong>:</div>
+                  <div className="auth-for">For <strong>{bDetails.businessName || 'Tamizhan Groups'}</strong>:</div>
                   <div className="auth-sign">Authorized Signatory</div>
                 </div>
               </div>

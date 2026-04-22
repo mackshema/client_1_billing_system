@@ -4,7 +4,7 @@ import './Dashboard.css';
 
 const DEFAULT_ITEM = { name: '', hsn: '', quantity: 1, unit: 'unit', price: 0, gst: 0 };
 
-export default function Dashboard({ businessSettings, onSaveSettings, onGenerateBill, toast }) {
+export default function Dashboard({ businessSettings, onSaveSettings, onGenerateBill, toast, onToggleDrawer }) {
   const [items, setItems] = useState([{ ...DEFAULT_ITEM, id: Date.now() }]);
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
@@ -119,6 +119,12 @@ export default function Dashboard({ businessSettings, onSaveSettings, onGenerate
     <div className="dashboard animate-fade">
       <div className="dashboard-header card">
         <div className="header-top">
+          <button className="btn btn-ghost btn-sm drawer-toggle-btn" onClick={onToggleDrawer}>
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          
           {isEditingSettings ? (
             <div className="settings-edit-wrapper animate-slide-up">
               <div className="settings-fields">
@@ -192,7 +198,7 @@ export default function Dashboard({ businessSettings, onSaveSettings, onGenerate
                 </div>
                 <div className="input-group-inline">
                   <span className="field-label">A/C Holder</span>
-                  <input className="input" value={tempSettings.bankHolder || ''} onChange={e => setTempSettings({...tempSettings, bankHolder: e.target.value})} placeholder="E.g. SRM AGENCIES" />
+                  <input className="input" value={tempSettings.bankHolder || ''} onChange={e => setTempSettings({...tempSettings, bankHolder: e.target.value})} placeholder="E.g. Tamizhan Groups" />
                 </div>
                 <div className="input-group-inline checkbox-group" style={{ marginTop: '0.5rem' }}>
                   <label className="checkbox-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600 }}>
@@ -212,6 +218,9 @@ export default function Dashboard({ businessSettings, onSaveSettings, onGenerate
             </div>
           ) : (
             <div className="business-info">
+              <div className="business-logo">
+                <img src="/logo.jpg" alt="Tamizhan Groups Logo" width="50" height="50" style={{ borderRadius: '50%', objectFit: 'cover' }} />
+              </div>
               <div className="business-details-text">
                 <h2>{businessSettings.businessName}</h2>
                 <p className="business-subtext">
@@ -289,7 +298,7 @@ export default function Dashboard({ businessSettings, onSaveSettings, onGenerate
                 title="Tax Type"
               >
                 <option value="CGST/SGST">CGST & SGST Split</option>
-                <option value="IGST">IGST Full</option>
+                <option value="No GST">No GST</option>
               </select>
             </>
           )}
@@ -320,19 +329,19 @@ export default function Dashboard({ businessSettings, onSaveSettings, onGenerate
         </datalist>
 
         <div className="items-list">
-          <div className="items-row headers" style={{ gridTemplateColumns: businessSettings.enableGST ? '2fr 1fr 1fr 1fr 1fr 1fr 1.5fr min-content' : undefined }}>
+          <div className="items-row headers" style={{ gridTemplateColumns: businessSettings.enableGST && taxType !== 'No GST' ? '2fr 1fr 1fr 1fr 1fr 1fr 1.5fr min-content' : undefined }}>
             <div className="col-name">Description</div>
-            {businessSettings.enableGST && <div className="col-hsn">HSN/SAC</div>}
+            {businessSettings.enableGST && taxType !== 'No GST' && <div className="col-hsn">HSN/SAC</div>}
             <div className="col-qty">Req Qty</div>
             <div className="col-unit">Unit</div>
             <div className="col-price">Rate</div>
-            <div className="col-gst">GST %</div>
+            {taxType !== 'No GST' && <div className="col-gst">GST %</div>}
             <div className="col-total">Total</div>
             <div className="col-action"></div>
           </div>
 
           {items.map((item, index) => (
-            <div key={item.id} className="items-row item-enter" style={{ gridTemplateColumns: businessSettings.enableGST ? '2fr 1fr 1fr 1fr 1fr 1fr 1.5fr min-content' : undefined }}>
+            <div key={item.id} className="items-row item-enter" style={{ gridTemplateColumns: businessSettings.enableGST && taxType !== 'No GST' ? '2fr 1fr 1fr 1fr 1fr 1fr 1.5fr min-content' : undefined }}>
               <div className="col-name">
                 <input
                   className="input"
@@ -343,7 +352,7 @@ export default function Dashboard({ businessSettings, onSaveSettings, onGenerate
                   autoFocus={index === items.length - 1 && items.length > 1}
                 />
               </div>
-              {businessSettings.enableGST && (
+              {businessSettings.enableGST && taxType !== 'No GST' && (
                 <div className="col-hsn">
                   <input
                     className="input"
@@ -380,19 +389,21 @@ export default function Dashboard({ businessSettings, onSaveSettings, onGenerate
                   placeholder="0.00"
                 />
               </div>
-              <div className="col-gst">
-                <input
-                  type="number"
-                  min="0"
-                  className="input"
-                  value={item.gst || ''}
-                  onChange={e => handleItemChange(item.id, 'gst', e.target.value)}
-                  placeholder="%"
-                />
-              </div>
+              {taxType !== 'No GST' && (
+                <div className="col-gst">
+                  <input
+                    type="number"
+                    min="0"
+                    className="input"
+                    value={item.gst || ''}
+                    onChange={e => handleItemChange(item.id, 'gst', e.target.value)}
+                    placeholder="%"
+                  />
+                </div>
+              )}
               <div className="col-total">
                 <div className="total-display">
-                  {formatCurrency(item.quantity * item.price * (1 + (Number(item.gst) || 0) / 100))}
+                  {formatCurrency(item.quantity * item.price * (1 + (taxType !== 'No GST' ? (Number(item.gst) || 0) : 0) / 100))}
                 </div>
               </div>
               <div className="col-action col-action-group">
@@ -451,11 +462,11 @@ export default function Dashboard({ businessSettings, onSaveSettings, onGenerate
               </div>
             </div>
             <div style={{ padding: '24px' }}>
-              <div className="catalog-form" style={{ display: 'grid', gridTemplateColumns: businessSettings.enableGST ? '2fr 1fr 1fr 1fr auto' : '2fr 1fr 1fr auto', gap: '12px', marginBottom: '24px' }}>
+              <div className="catalog-form" style={{ display: 'grid', gridTemplateColumns: businessSettings.enableGST && taxType !== 'No GST' ? '2fr 1fr 1fr 1fr auto' : '2fr 1fr 1fr auto', gap: '12px', marginBottom: '24px' }}>
                 <input className="input" placeholder="Item Name" value={newCatalogItem.name} onChange={e => setNewCatalogItem({...newCatalogItem, name: e.target.value})} />
-                {businessSettings.enableGST && <input className="input" placeholder="HSN/SAC" value={newCatalogItem.hsn} onChange={e => setNewCatalogItem({...newCatalogItem, hsn: e.target.value})} />}
+                {businessSettings.enableGST && taxType !== 'No GST' && <input className="input" placeholder="HSN/SAC" value={newCatalogItem.hsn} onChange={e => setNewCatalogItem({...newCatalogItem, hsn: e.target.value})} />}
                 <input type="number" min="0" className="input" placeholder="Rate" value={newCatalogItem.price} onChange={e => setNewCatalogItem({...newCatalogItem, price: e.target.value})} />
-                <input type="number" min="0" className="input" placeholder="GST %" value={newCatalogItem.gst} onChange={e => setNewCatalogItem({...newCatalogItem, gst: e.target.value})} />
+                {taxType !== 'No GST' && <input type="number" min="0" className="input" placeholder="GST %" value={newCatalogItem.gst} onChange={e => setNewCatalogItem({...newCatalogItem, gst: e.target.value})} />}
                 <button className="btn btn-primary" onClick={handleAddCatalogItem}>Add Item</button>
               </div>
 
@@ -464,20 +475,20 @@ export default function Dashboard({ businessSettings, onSaveSettings, onGenerate
                   <thead>
                     <tr>
                       <th>Name</th>
-                      {businessSettings.enableGST && <th>HSN/SAC</th>}
+                      {businessSettings.enableGST && taxType !== 'No GST' && <th>HSN/SAC</th>}
                       <th className="text-right">Price</th>
-                      <th className="text-right">GST %</th>
+                      {taxType !== 'No GST' && <th className="text-right">GST %</th>}
                       <th></th>
                     </tr>
                   </thead>
                   <tbody>
-                    {catalog.length === 0 && <tr><td colSpan="5" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>No items saved to catalog yet.</td></tr>}
+                    {catalog.length === 0 && <tr><td colSpan={businessSettings.enableGST && taxType !== 'No GST' ? 5 : 4} style={{ textAlign: 'center', padding: '20px', color: '#666' }}>No items saved to catalog yet.</td></tr>}
                     {catalog.map(c => (
                        <tr key={c.name}>
                          <td>{c.name}</td>
-                         {businessSettings.enableGST && <td>{c.hsn || '-'}</td>}
+                         {businessSettings.enableGST && taxType !== 'No GST' && <td>{c.hsn || '-'}</td>}
                          <td className="text-right">{formatCurrency(c.price)}</td>
-                         <td className="text-right">{c.gst ? `${c.gst}%` : '-'}</td>
+                         {taxType !== 'No GST' && <td className="text-right">{c.gst ? `${c.gst}%` : '-'}</td>}
                          <td className="text-right">
                            <button className="btn btn-danger btn-sm" style={{padding: '4px 8px'}} onClick={() => handleRemoveCatalogItem(c.name)}>Del</button>
                          </td>

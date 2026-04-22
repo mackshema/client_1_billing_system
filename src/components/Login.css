@@ -29,9 +29,8 @@
   align-items: center;
   margin-bottom: 24px;
 }
-.login-logo-container svg {
-  border-radius: 16px;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+.login-logo-container img {
+  box-shadow: 0 8px 16px rgba(0,0,0,0.15);
 }
 
 .login-header h1 {

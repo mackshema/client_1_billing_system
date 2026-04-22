@@ -8,7 +8,7 @@ const MAX_BILLS = 15;
 
 // This should ideally be in an environment variable, but for a standalone local app, 
 // using a consistent hash of a internal string provides basic local encryption.
-const SECRET_KEY = 'srm_agencies_secure_storage_key_2024';
+const SECRET_KEY = 'tamizhan_groups_secure_storage_key_2024';
 
 const encrypt = (data) => {
   if (!data) return null;
@@ -79,7 +79,7 @@ export const deleteBill = (invoiceNo) => {
 // ── Settings ──────────────────────────────────────────────────────────────────
 export const getSettings = () => {
   return decrypt(localStorage.getItem(SETTINGS_KEY)) || {
-    businessName: 'SRM AGENCIES',
+    businessName: 'Tamizhan Groups',
     businessAddress: '27/2 mahaveer nagar ext Ullur Kumbakonam',
     businessPhone: '9488188707',
     businessEmail: 'srmharinitravels@gmail.com',
@@ -89,7 +89,7 @@ export const getSettings = () => {
     bankName: 'INDIAN BANK, MUTT STREET',
     bankAccount: '7513201456',
     bankIFSC: 'IDIB000M138',
-    bankHolder: 'SRM AGENCIES'
+    bankHolder: 'Tamizhan Groups'
   };
 };
 
