@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# APK binaries (large files — download from releases instead)
+*.apk
+android/app/build/

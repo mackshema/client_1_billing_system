@@ -16,7 +16,7 @@ export default function Login({ onLogin, error, loading }) {
       <div className="login-card animate-slide-up">
         <div className="login-header">
           <div className="login-logo-container">
-            <img src="/logo.jpg" alt="Tamizhan Groups Logo" width="80" height="80" style={{ borderRadius: '50%', objectFit: 'cover' }} />
+            <img src="/logo.png" alt="Tamizhan Groups Logo" width="80" height="80" style={{ borderRadius: '50%', objectFit: 'cover' }} />
           </div>
           <h1>Welcome Back</h1>
           <p>Sign in to your account to continue</p>

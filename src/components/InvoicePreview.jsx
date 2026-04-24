@@ -1,35 +1,99 @@
 import { useRef, useMemo } from 'react';
-import { useReactToPrint } from 'react-to-print';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { formatCurrency, numberToWords } from '../utils/storage';
 import './InvoicePreview.css';
 
+// Detect if running inside Capacitor native app
+const isCapacitorAndroid = () => {
+  return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+};
+
+// Capture the invoice element and return a jsPDF instance
+const generatePdf = async (element) => {
+  const canvas = await html2canvas(element, {
+    scale: 2,
+    useCORS: true,
+    logging: false,
+    allowTaint: true,
+    backgroundColor: '#ffffff',
+  });
+  const imgData = canvas.toDataURL('image/png');
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+  pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+  return pdf;
+};
+
 export default function InvoicePreview({ bill, onClose }) {
   const componentRef = useRef(null);
-
-  const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
-    documentTitle: `Invoice_${bill?.invoiceNo}`,
-  });
 
   const handleDownloadPdf = async () => {
     const element = componentRef.current;
     if (!element) return;
-    
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      logging: false
-    });
-    
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-    
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`Invoice_${bill?.invoiceNo}.pdf`);
+
+    try {
+      const pdf = await generatePdf(element);
+      const fileName = `Invoice_${bill?.invoiceNo}.pdf`;
+      const pdfBlob = pdf.output('blob');
+      const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
+
+      // Try Web Share API with file (works on Android Chrome / WebView)
+      if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+        await navigator.share({
+          title: `Invoice ${bill?.invoiceNo}`,
+          text: `Invoice PDF`,
+          files: [pdfFile],
+        });
+      } else if (isCapacitorAndroid()) {
+        // Fallback: open blob URL in a new window on Android
+        const blobUrl = URL.createObjectURL(pdfBlob);
+        window.open(blobUrl, '_blank');
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
+      } else {
+        // Standard web browser download
+        pdf.save(fileName);
+      }
+    } catch (err) {
+      // AbortError = user dismissed the share sheet, not an actual error
+      if (err.name !== 'AbortError') {
+        console.error('PDF error:', err);
+        alert('Could not generate PDF. Please try again.');
+      }
+    }
+  };
+
+  const handlePrint = async () => {
+    const element = componentRef.current;
+    if (!element) return;
+
+    if (isCapacitorAndroid()) {
+      // Android WebView doesn't support window.print() — share the PDF instead
+      await handleDownloadPdf();
+    } else {
+      // Web browser: render PDF into hidden iframe and call print()
+      try {
+        const pdf = await generatePdf(element);
+        const blobUrl = URL.createObjectURL(pdf.output('blob'));
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'fixed';
+        iframe.style.top = '-9999px';
+        iframe.style.left = '-9999px';
+        iframe.src = blobUrl;
+        document.body.appendChild(iframe);
+        iframe.onload = () => {
+          iframe.contentWindow.focus();
+          iframe.contentWindow.print();
+          setTimeout(() => {
+            document.body.removeChild(iframe);
+            URL.revokeObjectURL(blobUrl);
+          }, 3000);
+        };
+      } catch (err) {
+        console.error('Print error:', err);
+      }
+    }
   };
 
   if (!bill) return null;
@@ -112,7 +176,7 @@ export default function InvoicePreview({ bill, onClose }) {
               <div className="invoice-header-row">
                 <div className="invoice-company-info">
                   <div className="srm-logo">
-                    <img src="/logo.jpg" alt="Logo" width="45" height="45" style={{ borderRadius: '50%', objectFit: 'cover' }} />
+                    <img src="/logo.png" alt="Logo" width="45" height="45" style={{ borderRadius: '50%', objectFit: 'cover' }} />
                   </div>
                   <div className="company-details">
                     <h1>{bDetails.businessName || 'Tamizhan Groups'}</h1>

@@ -4,7 +4,10 @@ import './Dashboard.css';
 
 const DEFAULT_ITEM = { name: '', hsn: '', quantity: 1, unit: 'unit', price: 0, gst: 0 };
 
-export default function Dashboard({ businessSettings, onSaveSettings, onGenerateBill, toast, onToggleDrawer }) {
+export default function Dashboard({ 
+  businessSettings, onSaveSettings, onGenerateBill, toast, onToggleDrawer,
+  isEditingSettings, setIsEditingSettings, isCatalogOpen, setIsCatalogOpen 
+}) {
   const [items, setItems] = useState([{ ...DEFAULT_ITEM, id: Date.now() }]);
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
@@ -15,8 +18,6 @@ export default function Dashboard({ businessSettings, onSaveSettings, onGenerate
   const [taxType, setTaxType] = useState('CGST/SGST');
   const [receivedAmount, setReceivedAmount] = useState('');
   
-  const [isEditingSettings, setIsEditingSettings] = useState(false);
-  const [isCatalogOpen, setIsCatalogOpen] = useState(false);
   const [newCatalogItem, setNewCatalogItem] = useState({ name: '', hsn: '', price: '', gst: '' });
   const [tempSettings, setTempSettings] = useState(businessSettings);
   const [catalog, setCatalog] = useState(() => getCatalog());
@@ -219,7 +220,7 @@ export default function Dashboard({ businessSettings, onSaveSettings, onGenerate
           ) : (
             <div className="business-info">
               <div className="business-logo">
-                <img src="/logo.jpg" alt="Tamizhan Groups Logo" width="50" height="50" style={{ borderRadius: '50%', objectFit: 'cover' }} />
+                <img src="/logo.png" alt="Tamizhan Groups Logo" width="50" height="50" style={{ borderRadius: '50%', objectFit: 'cover' }} />
               </div>
               <div className="business-details-text">
                 <h2>{businessSettings.businessName}</h2>
@@ -227,11 +228,6 @@ export default function Dashboard({ businessSettings, onSaveSettings, onGenerate
                   {businessSettings.businessAddress} {businessSettings.businessPhone && `• ${businessSettings.businessPhone}`}
                 </p>
               </div>
-              <button className="edit-btn" onClick={() => setIsEditingSettings(true)} title="Edit Business Info">
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-              </button>
             </div>
           )}
 
@@ -329,7 +325,7 @@ export default function Dashboard({ businessSettings, onSaveSettings, onGenerate
         </datalist>
 
         <div className="items-list">
-          <div className="items-row headers" style={{ gridTemplateColumns: businessSettings.enableGST && taxType !== 'No GST' ? '2fr 1fr 1fr 1fr 1fr 1fr 1.5fr min-content' : undefined }}>
+          <div className={`items-row headers ${businessSettings.enableGST && taxType !== 'No GST' ? 'items-row-full' : 'items-row-simple'}`}>
             <div className="col-name">Description</div>
             {businessSettings.enableGST && taxType !== 'No GST' && <div className="col-hsn">HSN/SAC</div>}
             <div className="col-qty">Req Qty</div>
@@ -341,7 +337,7 @@ export default function Dashboard({ businessSettings, onSaveSettings, onGenerate
           </div>
 
           {items.map((item, index) => (
-            <div key={item.id} className="items-row item-enter" style={{ gridTemplateColumns: businessSettings.enableGST && taxType !== 'No GST' ? '2fr 1fr 1fr 1fr 1fr 1fr 1.5fr min-content' : undefined }}>
+            <div key={item.id} className={`items-row item-enter ${businessSettings.enableGST && taxType !== 'No GST' ? 'items-row-full' : 'items-row-simple'}`}>
               <div className="col-name">
                 <input
                   className="input"
@@ -461,8 +457,8 @@ export default function Dashboard({ businessSettings, onSaveSettings, onGenerate
                 <button className="btn btn-ghost btn-sm" onClick={() => setIsCatalogOpen(false)}>Close</button>
               </div>
             </div>
-            <div style={{ padding: '24px' }}>
-              <div className="catalog-form" style={{ display: 'grid', gridTemplateColumns: businessSettings.enableGST && taxType !== 'No GST' ? '2fr 1fr 1fr 1fr auto' : '2fr 1fr 1fr auto', gap: '12px', marginBottom: '24px' }}>
+            <div className="modal-body">
+              <div className={`catalog-form ${businessSettings.enableGST && taxType !== 'No GST' ? 'catalog-form-full' : 'catalog-form-simple'}`}>
                 <input className="input" placeholder="Item Name" value={newCatalogItem.name} onChange={e => setNewCatalogItem({...newCatalogItem, name: e.target.value})} />
                 {businessSettings.enableGST && taxType !== 'No GST' && <input className="input" placeholder="HSN/SAC" value={newCatalogItem.hsn} onChange={e => setNewCatalogItem({...newCatalogItem, hsn: e.target.value})} />}
                 <input type="number" min="0" className="input" placeholder="Rate" value={newCatalogItem.price} onChange={e => setNewCatalogItem({...newCatalogItem, price: e.target.value})} />
