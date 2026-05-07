@@ -318,3 +318,22 @@
   .invoice-paper-wrapper { padding: 0; background: none; }
   .invoice-paper { box-shadow: none; margin: 0; padding: 0; width: 100%; min-height: auto; }
 }
+
+@media (max-width: 600px) {
+  .modal-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+  }
+  .modal-actions {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  .modal-actions button {
+    flex: 1;
+    white-space: nowrap;
+    padding: 8px;
+    font-size: 0.85rem;
+  }
+}

@@ -3,6 +3,8 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { formatCurrency, numberToWords } from '../utils/storage';
 import './InvoicePreview.css';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 
 // Detect if running inside Capacitor native app
 const isCapacitorAndroid = () => {
@@ -29,28 +31,46 @@ const generatePdf = async (element) => {
 export default function InvoicePreview({ bill, onClose }) {
   const componentRef = useRef(null);
 
-  const handleDownloadPdf = async () => {
+  const handleDownloadPdf = async (isPrint = false) => {
     const element = componentRef.current;
     if (!element) return;
 
     try {
       const pdf = await generatePdf(element);
-      const fileName = `Invoice_${bill?.invoiceNo}.pdf`;
+      const safeInvoiceNo = (bill?.invoiceNo || 'unknown').toString().replace(/[^a-zA-Z0-9-_\.]/g, '_');
+      const fileName = `Invoice_${safeInvoiceNo}.pdf`;
       const pdfBlob = pdf.output('blob');
       const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
 
-      // Try Web Share API with file (works on Android Chrome / WebView)
-      if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+      if (isCapacitorAndroid()) {
+        try {
+          const base64Data = pdf.output('datauristring').split(',')[1];
+          const savedFile = await Filesystem.writeFile({
+            path: fileName,
+            data: base64Data,
+            directory: Directory.Documents
+          });
+          
+          if (isPrint) {
+            await Share.share({
+              title: `Invoice ${bill?.invoiceNo}`,
+              text: `Invoice PDF`,
+              url: savedFile.uri,
+              dialogTitle: 'Print or Share PDF',
+            });
+          } else {
+            alert(`Downloaded! Saved to Documents as ${fileName}`);
+          }
+        } catch (e) {
+          console.error('Capacitor share error:', e);
+          alert(`Could not process PDF. Error: ${e.message || JSON.stringify(e)}`);
+        }
+      } else if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
         await navigator.share({
           title: `Invoice ${bill?.invoiceNo}`,
           text: `Invoice PDF`,
           files: [pdfFile],
         });
-      } else if (isCapacitorAndroid()) {
-        // Fallback: open blob URL in a new window on Android
-        const blobUrl = URL.createObjectURL(pdfBlob);
-        window.open(blobUrl, '_blank');
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
       } else {
         // Standard web browser download
         pdf.save(fileName);
@@ -70,7 +90,7 @@ export default function InvoicePreview({ bill, onClose }) {
 
     if (isCapacitorAndroid()) {
       // Android WebView doesn't support window.print() — share the PDF instead
-      await handleDownloadPdf();
+      await handleDownloadPdf(true);
     } else {
       // Web browser: render PDF into hidden iframe and call print()
       try {
@@ -162,7 +182,7 @@ export default function InvoicePreview({ bill, onClose }) {
           <h2>Invoice Preview</h2>
           <div className="modal-actions">
             <button className="btn btn-primary btn-sm" onClick={handlePrint}>Print</button>
-            <button className="btn btn-primary btn-sm" onClick={handleDownloadPdf}>Download PDF</button>
+            <button className="btn btn-primary btn-sm" onClick={() => handleDownloadPdf(false)}>Download PDF</button>
             <button className="btn btn-ghost btn-sm" onClick={onClose}>Close</button>
           </div>
         </div>
