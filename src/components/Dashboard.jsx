@@ -227,6 +227,7 @@ export default function Dashboard({
                 <p className="business-subtext">
                   {businessSettings.businessAddress} {businessSettings.businessPhone && `• ${businessSettings.businessPhone}`}
                 </p>
+                <p style={{ fontSize: '0.6rem', color: '#999', marginTop: '4px' }}>Build: 2026.05.13-Final</p>
               </div>
             </div>
           )}

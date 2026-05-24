@@ -1,5 +1,5 @@
 {
-  "appId": "com.client.billing",
+  "appId": "com.client.billing.v2",
   "appName": "Billing System",
   "webDir": "dist"
 }

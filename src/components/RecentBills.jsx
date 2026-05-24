@@ -1,4 +1,5 @@
 import { formatCurrency, formatDate } from '../utils/storage';
+import { exportToCSV } from '../utils/export';
 import './Dashboard.css'; // Reusing some modal styles
 
 export default function RecentBills({ bills, onSelectBill, selectedBillNo, onClose }) {
@@ -17,11 +18,18 @@ export default function RecentBills({ bills, onSelectBill, selectedBillNo, onClo
               <p style={{ margin: 0, fontSize: '0.85rem', color: '#666' }}>Showing last 20 generated invoices</p>
             </div>
           </div>
-          <button className="btn btn-ghost btn-sm" onClick={onClose} title="Close">
-            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button className="btn btn-ghost btn-sm" onClick={() => exportToCSV(bills)} title="Export to CSV">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </button>
+            <button className="btn btn-ghost btn-sm" onClick={onClose} title="Close">
+              <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div className="modal-body" style={{ padding: '0 0 16px 0', maxHeight: '70vh', overflowY: 'auto' }}>

@@ -81,22 +81,6 @@ export default function App() {
     return bill;
   };
 
-  if (loading) {
-    return null; // Or a loading spinner
-  }
-
-  if (!isAuthenticatedState) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Login 
-          onLogin={handleLogin} 
-          error={loginError} 
-          loading={false} 
-        />
-      </SafeAreaView>
-    );
-  }
-
   return (
     <SafeAreaView style={styles.container}>
       <Dashboard 

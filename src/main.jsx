@@ -4,6 +4,8 @@ import './index.css'
 import App from './App.jsx'
 
 // Register service worker for PWA
+/* 
+// Service worker registration removed to prevent caching issues in mobile app
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js', { scope: '/' })
@@ -15,6 +17,7 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
+*/
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

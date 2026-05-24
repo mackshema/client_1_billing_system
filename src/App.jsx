@@ -19,6 +19,7 @@ function App() {
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
   const [isRecentBillsOpen, setIsRecentBillsOpen] = useState(false);
 
+
   const handleSaveSettings = (newSettings) => {
     saveSettings(newSettings);
     setBusinessSettings(newSettings);
