@@ -38,7 +38,10 @@ export const clearSession = () => sessionStorage.removeItem(AUTH_KEY);
 export const isAuthenticated = () => !!getSession();
 
 // ── Catalog ───────────────────────────────────────────────────────────────────
-export const getCatalog = () => decrypt(localStorage.getItem(CATALOG_KEY)) || [];
+export const getCatalog = () => {
+  const data = decrypt(localStorage.getItem(CATALOG_KEY));
+  return Array.isArray(data) ? data : [];
+};
 
 export const saveToCatalog = (item) => {
   const catalog = getCatalog();
@@ -61,7 +64,10 @@ export const deleteFromCatalog = (name) => {
 };
 
 // ── Bills ─────────────────────────────────────────────────────────────────────
-export const getBills = () => decrypt(localStorage.getItem(BILLS_KEY)) || [];
+export const getBills = () => {
+  const data = decrypt(localStorage.getItem(BILLS_KEY));
+  return Array.isArray(data) ? data : [];
+};
 
 export const saveBill = (bill) => {
   const bills = getBills();
@@ -78,7 +84,8 @@ export const deleteBill = (invoiceNo) => {
 
 // ── Settings ──────────────────────────────────────────────────────────────────
 export const getSettings = () => {
-  return decrypt(localStorage.getItem(SETTINGS_KEY)) || {
+  const data = decrypt(localStorage.getItem(SETTINGS_KEY));
+  const defaultSettings = {
     businessName: 'Tamizhan Groups',
     businessAddress: '27/2 mahaveer nagar ext Ullur Kumbakonam',
     businessPhone: '9488188707',
@@ -91,6 +98,7 @@ export const getSettings = () => {
     bankIFSC: 'IDIB000M138',
     bankHolder: 'Tamizhan Groups'
   };
+  return (data && typeof data === 'object' && !Array.isArray(data)) ? data : defaultSettings;
 };
 
 export const saveSettings = (settings) =>

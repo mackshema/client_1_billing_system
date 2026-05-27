@@ -1,5 +1,5 @@
 {
-  "appId": "com.client.billing.v2",
-  "appName": "Billing System",
+  "appId": "com.client.billing",
+  "appName": "DashRudra billing system",
   "webDir": "dist"
 }

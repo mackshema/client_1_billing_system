@@ -2,6 +2,35 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      window.onerror = function(message, source, lineno, colno, error) {
+        const div = document.createElement('div');
+        div.style.position = 'fixed';
+        div.style.inset = '0';
+        div.style.background = '#ffebee';
+        div.style.color = '#c62828';
+        div.style.padding = '20px';
+        div.style.fontFamily = 'monospace';
+        div.style.zIndex = '999999';
+        div.style.overflow = 'auto';
+        div.innerHTML = '<h1>Runtime Error</h1><p><strong>Message:</strong> ' + message + '</p><p><strong>Source:</strong> ' + source + '</p><p><strong>Line:</strong> ' + lineno + ' <strong>Column:</strong> ' + colno + '</p><pre>' + (error && error.stack || '') + '</pre>';
+        document.body.appendChild(div);
+        return false;
+      };
+      window.onunhandledrejection = function(event) {
+        const div = document.createElement('div');
+        div.style.position = 'fixed';
+        div.style.inset = '0';
+        div.style.background = '#ffebee';
+        div.style.color = '#c62828';
+        div.style.padding = '20px';
+        div.style.fontFamily = 'monospace';
+        div.style.zIndex = '999999';
+        div.style.overflow = 'auto';
+        div.innerHTML = '<h1>Unhandled Rejection</h1><p><strong>Reason:</strong> ' + event.reason + '</p>';
+        document.body.appendChild(div);
+      };
+    </script>
     <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#1a1a2e" />
