@@ -1,0 +1,126 @@
+definitions:
+  environment:
+    vars:
+      XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+      XCODE_SCHEME: "App"
+      BUNDLE_ID: "com.client.billing"
+      PACKAGE_NAME: "com.client.billing"
+
+workflows:
+  ios-release:
+    name: iOS Production Build
+    instance_type: mac_mini_m1
+    max_build_duration: 60
+    environment:
+      xcode: latest
+      node: 20.x
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: $BUNDLE_ID
+    triggering:
+      events:
+        - push
+        - pull_request
+      branch:
+        include:
+          - main
+          - develop
+    scripts:
+      - name: Install Node dependencies
+        script: |
+          npm install
+      
+      - name: Build web assets
+        script: |
+          npm run build
+      
+      - name: Add iOS platform (if needed)
+        script: |
+          if [ ! -d "ios" ]; then
+            npx cap add ios
+          fi
+      
+      - name: Capacitor sync
+        script: |
+          npx cap sync ios
+      
+      - name: Update CocoaPods
+        script: |
+          cd ios/App
+          pod repo update
+          pod install --repo-update
+          cd ../
+      
+      - name: Build iOS app
+        script: |
+          xcodebuild build-for-testing \
+            -workspace "$XCODE_WORKSPACE" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -derivedDataPath build
+      
+      - name: Create IPA
+        script: |
+          cd ios/App
+          xcodebuild -exportArchive \
+            -archivePath ../build/App.xcarchive \
+            -exportOptionsPlist ExportOptions.plist \
+            -exportPath ../build/ipa \
+            -allowProvisioningUpdates
+          cd ../../
+    
+    artifacts:
+      - ios/build/ipa/**/*.ipa
+      - ios/build/**/*.xcarchive
+    publishing:
+      email:
+        recipients:
+          - $CODEMAGIC_EMAIL
+        notify:
+          success: true
+          failure: true
+
+  android-release:
+    name: Android Production Build
+    instance_type: linux_x2
+    max_build_duration: 60
+    environment:
+      java: default
+      node: 20.x
+    triggering:
+      events:
+        - push
+        - pull_request
+      branch:
+        include:
+          - main
+          - develop
+    scripts:
+      - name: Install Node dependencies
+        script: |
+          npm install
+      
+      - name: Build web assets
+        script: |
+          npm run build
+      
+      - name: Capacitor sync
+        script: |
+          npx cap sync android
+      
+      - name: Build Android APK
+        script: |
+          cd android
+          ./gradlew bundleRelease
+          cd ..
+    
+    artifacts:
+      - android/app/build/outputs/bundle/release/*.aab
+      - android/app/build/outputs/apk/release/*.apk
+    publishing:
+      email:
+        recipients:
+          - $CODEMAGIC_EMAIL
+        notify:
+          success: true
+          failure: true

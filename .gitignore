@@ -12,6 +12,23 @@ dist
 dist-ssr
 *.local
 
+# iOS build artifacts
+ios/App/Pods/
+ios/App/*.xcarchive
+ios/App/build/
+ios/App/.derived/
+ios/App/DerivedData/
+ios/App/.DS_Store
+ios/App/*.ipa
+
+# Capacitor
+.capacitor/
+
+# Android
+android/app/build/
+android/.gradle/
+android/**/.DS_Store
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -25,4 +42,10 @@ dist-ssr
 
 # APK binaries (large files — download from releases instead)
 *.apk
-android/app/build/
+*.aab
+*.ipa
+
+# Environment
+.env
+.env.local
+.env.*.local
