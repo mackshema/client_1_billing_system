@@ -17,12 +17,6 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: $BUNDLE_ID
-    triggering:
-      events:
-        - push
-        - pull_request
-      branch:
-        pattern: '(main|develop)'
     scripts:
       - name: Install Node dependencies
         script: |
@@ -85,12 +79,6 @@ workflows:
     environment:
       java: default
       node: 20.x
-    triggering:
-      events:
-        - push
-        - pull_request
-      branch:
-        pattern: '(main|develop)'
     scripts:
       - name: Install Node dependencies
         script: |
