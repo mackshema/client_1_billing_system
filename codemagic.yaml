@@ -22,9 +22,7 @@ workflows:
         - push
         - pull_request
       branch:
-        include:
-          - main
-          - develop
+        pattern: '(main|develop)'
     scripts:
       - name: Install Node dependencies
         script: |
@@ -92,9 +90,7 @@ workflows:
         - push
         - pull_request
       branch:
-        include:
-          - main
-          - develop
+        pattern: '(main|develop)'
     scripts:
       - name: Install Node dependencies
         script: |
