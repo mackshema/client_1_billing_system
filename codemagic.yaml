@@ -1,94 +1,87 @@
-definitions:
-  environment:
-    vars:
-      XCODE_WORKSPACE: "ios/App/App.xcworkspace"
-      XCODE_SCHEME: "App"
-      BUNDLE_ID: "com.client.billing"
-      PACKAGE_NAME: "com.client.billing"
-
 workflows:
-  ios-release:
-    name: iOS Production Build
-    instance_type: mac_mini_m1
-    max_build_duration: 60
-    environment:
-      xcode: latest
-      node: 22
-    scripts:
-      - name: Install Node dependencies
-        script: |
-          npm install --legacy-peer-deps
-      
-      - name: Build web assets
-        script: |
-          npm run build
-      
-      - name: Add iOS platform (if needed)
-        script: |
-          if [ ! -d "ios" ]; then
-            npx cap add ios
-          fi
-      
-      - name: Capacitor sync
-        script: |
-          npx cap sync ios
-      
-      - name: Update CocoaPods
-        script: |
-          cd ios/App
-          pod repo update
-          pod install --repo-update
-          cd ../
-      
-      - name: Build iOS app
-        script: |
-          xcodebuild build-for-testing \
-          -workspace ios/App/App.xcworkspace \
-          -scheme App \
-          -configuration Release \
-          -derivedDataPath build
-      
-      - name: Create IPA
-        script: |
-          cd ios/App
-          xcodebuild -exportArchive \
-            -archivePath ../build/App.xcarchive \
-            -exportOptionsPlist ExportOptions.plist \
-            -exportPath ../build/ipa \
-            -allowProvisioningUpdates
-          cd ../../
-    
-    artifacts:
-      - ios/build/ipa/**/*.ipa
-      - ios/build/**/*.xcarchive
+ios-release:
+name: iOS Production Build
+instance_type: mac_mini_m1
+max_build_duration: 60
 
-  android-release:
-    name: Android Production Build
-    instance_type: linux_x2
-    max_build_duration: 60
-    environment:
-      java: default
-      java: 17
-      node: 22
-    scripts:
-      - name: Install Node dependencies
-        script: |
-          npm install
-      
-      - name: Build web assets
-        script: |
-          npm run build
-      
-      - name: Capacitor sync
-        script: |
-          npx cap sync android
-      
-      - name: Build Android APK
-        script: |
-          cd android
-          ./gradlew bundleRelease
-          cd ..
-    
-    artifacts:
-      - android/app/build/outputs/bundle/release/*.aab
-      - android/app/build/outputs/apk/release/*.apk
+```
+environment:
+  xcode: latest
+  node: 22
+
+scripts:
+  - name: Install Node dependencies
+    script: |
+      npm install --legacy-peer-deps
+
+  - name: Build web assets
+    script: |
+      npm run build
+
+  - name: Check Capacitor
+    script: |
+      npx cap --version
+
+  - name: Add iOS platform
+    script: |
+      npm install @capacitor/ios --legacy-peer-deps
+      npx cap add ios || true
+
+  - name: Sync Capacitor
+    script: |
+      npx cap sync ios
+
+  - name: Debug iOS structure
+    script: |
+      echo "=== ROOT ==="
+      ls -la
+
+      echo "=== IOS ==="
+      ls -la ios || true
+
+      echo "=== IOS APP ==="
+      ls -la ios/App || true
+
+      echo "=== WORKSPACES ==="
+      find ios -name "*.xcworkspace" || true
+
+      echo "=== XCODE PROJECTS ==="
+      find ios -name "*.xcodeproj" || true
+
+artifacts:
+  - ios/**/*.xcworkspace
+  - ios/**/*.xcodeproj
+```
+
+android-release:
+name: Android Production Build
+instance_type: linux_x2
+max_build_duration: 60
+
+```
+environment:
+  java: 17
+  node: 22
+
+scripts:
+  - name: Install Node dependencies
+    script: |
+      npm install --legacy-peer-deps
+
+  - name: Build web assets
+    script: |
+      npm run build
+
+  - name: Sync Android
+    script: |
+      npx cap sync android
+
+  - name: Build Android APK
+    script: |
+      cd android
+      ./gradlew assembleRelease
+
+artifacts:
+  - android/app/build/outputs/**/*.apk
+  - android/app/build/outputs/**/*.aab
+```
