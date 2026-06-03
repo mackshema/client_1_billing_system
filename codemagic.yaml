@@ -1,90 +1,96 @@
 workflows:
-ios-release:
-name: iOS Production Build
-instance_type: mac_mini_m1
-max_build_duration: 60
+  ios-release:
+    name: iOS Production Build
+    instance_type: mac_mini_m1
+    max_build_duration: 60
 
-```
-environment:
-  xcode: latest
-  node: 22
+    environment:
+      xcode: latest
+      node: 22
 
-scripts:
-  - name: Install Dependencies
-    script: |
-      npm install --legacy-peer-deps
+    scripts:
+      - name: Install Dependencies
+        script: |
+          npm install --legacy-peer-deps
 
-  - name: Build Web App
-    script: |
-      npm run build
+      - name: Build Web Assets
+        script: |
+          npm run build
 
-  - name: Install iOS Platform
-    script: |
-      npm install @capacitor/ios --legacy-peer-deps
-      npx cap add ios || true
+      - name: Install iOS Platform
+        script: |
+          npm install @capacitor/ios --legacy-peer-deps
+          npx cap add ios || true
 
-  - name: Sync Capacitor
-    script: |
-      npx cap sync ios
+      - name: Sync Capacitor
+        script: |
+          npx cap sync ios
 
-  - name: Debug Project Structure
-    script: |
-      pwd
-      ls -la
-      find ios -name "*.xcworkspace" || true
-      find ios -name "*.xcodeproj" || true
+      - name: Debug iOS Structure
+        script: |
+          echo "=== ROOT ==="
+          ls -la
 
-  - name: Install CocoaPods
-    script: |
-      cd ios/App
-      pod install --repo-update || true
-      cd ../..
+          echo "=== IOS ==="
+          ls -la ios || true
 
-  - name: Build iOS Project
-    script: |
-      xcodebuild build \
-        -project ios/App/App.xcodeproj \
-        -scheme App \
-        -configuration Release
+          echo "=== IOS APP ==="
+          ls -la ios/App || true
 
-artifacts:
-  - ios/**/*.xcworkspace
-  - ios/**/*.xcodeproj
-  - ios/**/*.app
-  - ios/**/*.ipa
-```
+          echo "=== WORKSPACES ==="
+          find ios -name "*.xcworkspace" || true
 
-android-release:
-name: Android Production Build
-instance_type: linux_x2
-max_build_duration: 60
+          echo "=== XCODE PROJECTS ==="
+          find ios -name "*.xcodeproj" || true
 
-```
-environment:
-  java: 17
-  node: 22
+      - name: Install CocoaPods
+        script: |
+          cd ios/App || exit 1
+          pod install --repo-update || true
+          cd ../..
 
-scripts:
-  - name: Install Dependencies
-    script: |
-      npm install --legacy-peer-deps
+      - name: Build iOS Project
+        script: |
+          xcodebuild build \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release
 
-  - name: Build Web App
-    script: |
-      npm run build
+    artifacts:
+      - ios/**/*.xcworkspace
+      - ios/**/*.xcodeproj
+      - ios/**/*.app
+      - ios/**/*.ipa
 
-  - name: Sync Android
-    script: |
-      npx cap sync android
+  android-release:
+    name: Android Production Build
+    instance_type: linux_x2
+    max_build_duration: 60
 
-  - name: Build Android APK
-    script: |
-      cd android
-      chmod +x gradlew
-      ./gradlew assembleRelease
-      cd ..
+    environment:
+      java: 17
+      node: 22
 
-artifacts:
-  - android/app/build/outputs/**/*.apk
-  - android/app/build/outputs/**/*.aab
-```
+    scripts:
+      - name: Install Dependencies
+        script: |
+          npm install --legacy-peer-deps
+
+      - name: Build Web Assets
+        script: |
+          npm run build
+
+      - name: Sync Android
+        script: |
+          npx cap sync android
+
+      - name: Build Android APK
+        script: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease
+          cd ..
+
+    artifacts:
+      - android/app/build/outputs/**/*.apk
+      - android/app/build/outputs/**/*.aab
