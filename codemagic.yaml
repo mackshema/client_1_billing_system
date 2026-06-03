@@ -64,13 +64,6 @@ workflows:
     artifacts:
       - ios/build/ipa/**/*.ipa
       - ios/build/**/*.xcarchive
-    publishing:
-      email:
-        recipients:
-          - $CODEMAGIC_EMAIL
-        notify:
-          success: true
-          failure: true
 
   android-release:
     name: Android Production Build
@@ -101,10 +94,3 @@ workflows:
     artifacts:
       - android/app/build/outputs/bundle/release/*.aab
       - android/app/build/outputs/apk/release/*.apk
-    publishing:
-      email:
-        recipients:
-          - $CODEMAGIC_EMAIL
-        notify:
-          success: true
-          failure: true
