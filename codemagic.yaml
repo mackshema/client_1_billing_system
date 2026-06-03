@@ -14,9 +14,6 @@ workflows:
     environment:
       xcode: latest
       node: 20.x
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.client.billing
     scripts:
       - name: Install Node dependencies
         script: |
