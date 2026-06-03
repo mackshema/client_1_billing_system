@@ -13,7 +13,7 @@ workflows:
     max_build_duration: 60
     environment:
       xcode: latest
-      node: 20
+      node: 22
     scripts:
       - name: Install Node dependencies
         script: |
@@ -68,7 +68,8 @@ workflows:
     max_build_duration: 60
     environment:
       java: default
-      node: 20
+      java: 17
+      node: 22
     scripts:
       - name: Install Node dependencies
         script: |
