@@ -43,10 +43,10 @@ workflows:
       - name: Build iOS app
         script: |
           xcodebuild build-for-testing \
-            -workspace "$XCODE_WORKSPACE" \
-            -scheme "$XCODE_SCHEME" \
-            -configuration Release \
-            -derivedDataPath build
+          -workspace ios/App/App.xcworkspace \
+          -scheme App \
+          -configuration Release \
+          -derivedDataPath build
       
       - name: Create IPA
         script: |
